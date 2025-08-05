@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #667eea 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 0 20px rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .avatar-container {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            position: relative;
+            perspective: 1000px;
+        }
+        
+        .avatar-3d {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .avatar-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5em;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border: 4px solid #2a5298;
+        }
+        
+        .avatar-front {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            transform: translateZ(20px);
+        }
+        
+        .avatar-back {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: rotateY(180deg) translateZ(20px);
+        }
+        
+        .avatar-glow {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(42, 82, 152, 0.3) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+            z-index: -1;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotateY(0deg); }
+            25% { transform: translateY(-10px) rotateY(90deg); }
+            50% { transform: translateY(0px) rotateY(180deg); }
+            75% { transform: translateY(-10px) rotateY(270deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+        
+        .logo {
+            font-size: 3em;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2a5298;
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(42, 82, 152, 0.3);
+        }
+        
+        .datetime-display {
+            background: #f0f2f5;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-login {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+        
+        .btn-logout {
+            background: linear-gradient(135deg, #fd7e14, #e83e8c);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 600;
+            display: none;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.processing {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2a5298;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .recent-activity {
+            margin-top: 30px;
+            text-align: left;
+        }
+        
+        .recent-activity h3 {
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e1e1e1;
+        }
+        
+        .activity-item {
+            background: rgba(248, 249, 250, 0.8);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #2a5298;
+        }
+        
+        .activity-time {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .quote-section {
+            margin: 25px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(30, 60, 114, 0.1), rgba(42, 82, 152, 0.1));
+            border-radius: 15px;
+            border: 1px solid rgba(42, 82, 152, 0.2);
+        }
+        
+        .quote-text {
+            font-style: italic;
+            font-size: 1.1em;
+            color: #1e3c72;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .quote-author {
+            font-size: 0.9em;
+            color: #2a5298;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="avatar-container">
+            <div class="avatar-glow"></div>
+            <div class="avatar-3d">
+                <div class="avatar-face avatar-front">👤</div>
+                <div class="avatar-face avatar-back">💼</div>
+            </div>
+        </div>
+        
+        <h1>Employee Tracker</h1>
+        <p class="subtitle">Track your daily attendance</p>
+        
+        <div id="quoteSection" class="quote-section">
+            <div class="quote-text" id="quoteText">Welcome! Ready to make today productive?</div>
+            <div class="quote-author" id="quoteAuthor">- Motivation Team</div>
+        </div>
+        
+        <form id="attendanceForm">
+            <div class="form-group">
+                <label for="name">Employee Name *</label>
+                <input type="text" id="name" name="name" required placeholder="Enter your full name">
+            </div>
+            
+            <div class="form-group">
+                <label for="department">Department *</label>
+                <select id="department" name="department" required>
+                    <option value="">Select Department</option>
+                    <option value="IT">Information Technology</option>
+                    <option value="HR">Human Resources</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Operations">Operations</option>
+                    <option value="Sales">Sales</option>
+                    <option value="Support">Customer Support</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            
+            <div class="datetime-display">
+                <div><strong>Current Date:</strong> <span id="currentDate"></span></div>
+                <div><strong>Current Time:</strong> <span id="currentTime"></span></div>
+            </div>
+            
+            <div class="button-group">
+                <button type="button" class="btn btn-login" onclick="submitAttendance('login')">
+                    📥 Login
+                </button>
+                <button type="button" class="btn btn-logout" onclick="submitAttendance('logout')">
+                    📤 Logout
+                </button>
+            </div>
+        </form>
+        
+        <div id="status" class="status"></div>
+        
+        <div class="recent-activity">
+            <h3>Recent Activity</h3>
+            <div id="recentActivity">
+                <p style="color: #666; font-style: italic;">No recent activity</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Motivational quotes based on time
+        const motivationalQuotes = {
+            morning: [
+                { text: "Every morning brings new potential, but if you dwell on the misfortunes of the day before, you can't see them.", author: "Steve Maraboli" },
+                { text: "The way to get started is to quit talking and begin doing.", author: "Walt Disney" },
+                { text: "Your limitation—it's only your imagination.", author: "Unknown" },
+                { text: "Push yourself, because no one else is going to do it for you.", author: "Unknown" },
+                { text: "Great things never come from comfort zones.", author: "Unknown" }
+            ],
+            afternoon: [
+                { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
+                { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+                { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
+                { text: "The future depends on what you do today.", author: "Mahatma Gandhi" },
+                { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" }
+            ],
+            evening: [
+                { text: "Hard work beats talent when talent doesn't work hard.", author: "Tim Notke" },
+                { text: "The expert in anything was once a beginner.", author: "Helen Hayes" },
+                { text: "Success is walking from failure to failure with no loss of enthusiasm.", author: "Winston Churchill" },
+                { text: "Don't be afraid to give up the good to go for the great.", author: "John D. Rockefeller" },
+                { text: "The way to achieve your own success is to be willing to help somebody else get it first.", author: "Iyanla Vanzant" }
+            ]
+        };
+        
+        const logoutQuotes = [
+            { text: "Thank you for your dedication and hard work today! Rest well, you've earned it.", author: "Appreciation Team" },
+            { text: "Your efforts today have made a difference. Take pride in what you've accomplished!", author: "Management" },
+            { text: "Well done today! Your commitment doesn't go unnoticed.", author: "Team Lead" },
+            { text: "Thank you for bringing your best self to work today. Enjoy your well-deserved rest!", author: "HR Team" },
+            { text: "Your hard work and dedication inspire us all. Have a wonderful evening!", author: "Leadership Team" }
+        ];
+        
+        // Display appropriate quote based on time and action
+        function displayQuote(action = 'login') {
+            const now = new Date();
+            const hour = now.getHours();
+            let timeOfDay;
+            
+            if (hour >= 5 && hour < 12) {
+                timeOfDay = 'morning';
+            } else if (hour >= 12 && hour < 17) {
+                timeOfDay = 'afternoon';
+            } else {
+                timeOfDay = 'evening';
+            }
+            
+            let quotes;
+            
+            if (action === 'logout') {
+                quotes = logoutQuotes;
+            } else {
+                quotes = motivationalQuotes[timeOfDay];
+            }
+            
+            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+            
+            document.getElementById('quoteText').textContent = randomQuote.text;
+            document.getElementById('quoteAuthor').textContent = `- ${randomQuote.author}`;
+        }
+        // Update current date and time
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                weekday: 'long'
+            };
+            const timeOptions = {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            };
+            
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', options);
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US', timeOptions);
+        }
+        
+        // Update time every second
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+        
+        // Load recent activity from localStorage
+        function loadRecentActivity() {
+            const activities = JSON.parse(localStorage.getItem('recentActivities') || '[]');
+            const container = document.getElementById('recentActivity');
+            
+            if (activities.length === 0) {
+                container.innerHTML = '<p style="color: #666; font-style: italic;">No recent activity</p>';
+                return;
+            }
+            
+            container.innerHTML = activities
+                .slice(-5) // Show last 5 activities
+                .reverse()
+                .map(activity => `
+                    <div class="activity-item">
+                        <strong>${activity.name}</strong> - ${activity.department}
+                        <br>
+                        <span style="color: ${activity.action === 'login' ? '#4CAF50' : '#f44336'};">
+                            ${activity.action.toUpperCase()}
+                        </span>
+                        <div class="activity-time">${activity.datetime}</div>
+                    </div>
+                `).join('');
+        }
+        
+        // Save activity to localStorage
+        function saveActivity(name, department, action) {
+            const activities = JSON.parse(localStorage.getItem('recentActivities') || '[]');
+            const now = new Date();
+            
+            activities.push({
+                name,
+                department,
+                action,
+                datetime: now.toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                })
+            });
+            
+            // Keep only last 20 activities
+            if (activities.length > 20) {
+                activities.shift();
+            }
+            
+            localStorage.setItem('recentActivities', JSON.stringify(activities));
+            loadRecentActivity();
+        }
+        
+        // Submit attendance
+        async function submitAttendance(action) {
+            const form = document.getElementById('attendanceForm');
+            const name = document.getElementById('name').value.trim();
+            const department = document.getElementById('department').value;
+            const statusDiv = document.getElementById('status');
+            
+            // Validation
+            if (!name) {
+                showStatus('Please enter your name', 'error');
+                document.getElementById('name').focus();
+                return;
+            }
+            
+            if (!department) {
+                showStatus('Please select your department', 'error');
+                document.getElementById('department').focus();
+                return;
+            }
+            
+            // Get current date and time
+            const now = new Date();
+            const date = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+            const time = now.toTimeString().split(' ')[0]; // HH:MM:SS format
+            
+            // Disable buttons during submission
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(btn => btn.disabled = true);
+            
+            showStatus('<span class="spinner"></span>Processing...', 'processing');
+            
+            try {
+                // Replace with your actual backend URL when deployed
+                const response = await fetch('/attendance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name,
+                        department,
+                        date,
+                        time,
+                        action
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    displayQuote(action); // Show appropriate quote
+                    showStatus(`${action.charAt(0).toUpperCase() + action.slice(1)} recorded successfully!`, 'success');
+                    saveActivity(name, department, action);
+                    
+                    // Optional: Clear form after successful submission
+                    // form.reset();
+                } else {
+                    throw new Error(result.error || 'Failed to record attendance');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus('Error: ' + error.message, 'error');
+            } finally {
+                // Re-enable buttons
+                buttons.forEach(btn => btn.disabled = false);
+            }
+        }
+        
+        // Show status message
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+            
+            // Auto-hide success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        // Load recent activity on page load
+        loadRecentActivity();
+        
+        // Display initial motivational quote
+        displayQuote('login');
+        
+        // Auto-fill name if previously used
+        const lastUsedName = localStorage.getItem('lastUsedName');
+        if (lastUsedName) {
+            document.getElementById('name').value = lastUsedName;
+        }
+        
+        // Save name when typing
+        document.getElementById('name').addEventListener('input', function() {
+            if (this.value.trim()) {
+                localStorage.setItem('lastUsedName', this.value.trim());
+            }
+        });
+    </script>
+</body>
+</html>
